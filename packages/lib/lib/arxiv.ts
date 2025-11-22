@@ -5,6 +5,7 @@ import path from "path";
 import matter from "gray-matter";
 import { XMLParser } from "fast-xml-parser";
 
+// ArXiv API endpoint - this is the official API URL
 const ARXIV_API_URL = "http://export.arxiv.org/api/query?id_list=";
 
 export function getArxivPaperIds(): string[] {

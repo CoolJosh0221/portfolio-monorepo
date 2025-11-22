@@ -1,4 +1,5 @@
 // lib/spotify.ts
+// Note: These endpoints are shared across all sites that use Spotify integration
 const TOKEN_ENDPOINT = 'https://accounts.spotify.com/api/token';
 const NOW_PLAYING_ENDPOINT = 'https://api.spotify.com/v1/me/player/currently-playing';
 
