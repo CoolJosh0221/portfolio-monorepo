@@ -1,7 +1,17 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import Lanyard from './Lanyard'
+import dynamic from 'next/dynamic'
+
+// Dynamic import for Lanyard component - saves ~500KB from initial bundle
+const Lanyard = dynamic(() => import('./Lanyard'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full">
+      <div className="animate-pulse text-secondary">Loading 3D model...</div>
+    </div>
+  ),
+})
 
 // Reusable component for section titles
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (

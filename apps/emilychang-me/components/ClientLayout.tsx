@@ -10,6 +10,7 @@ import { LanguageProvider } from "@portfolio/lib/contexts/LanguageContext"
 import VideoInitializer from "@portfolio/ui/video-initializer"
 import NotificationProvider from "@portfolio/ui/notification-provider"
 import { useStableAnchor } from "@portfolio/lib/hooks/use-stable-anchor"
+import { ScrollProgressIndicator } from "@portfolio/ui/scroll-progress-indicator"
 
 export default function ClientLayout({
   children,
@@ -22,6 +23,7 @@ export default function ClientLayout({
 
   return (
     <LanguageProvider englishOnly>
+      <ScrollProgressIndicator />
       <EmilyHeader />
       {isMobile ? (
         children

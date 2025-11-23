@@ -90,3 +90,8 @@ export * from './typography-specimen';
 export * from './updates-section';
 export * from './video-embed';
 export * from './video-initializer';
+
+// Performance & UX enhancements
+export * from './scroll-progress-indicator';
+export * from './page-transition';
+export * from './enhanced-click-spark';

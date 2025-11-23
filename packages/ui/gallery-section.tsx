@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useCallback, memo } from "react"
 import GalleryCard from "./gallery-card"
 import { GalleryItemMetadata } from "@portfolio/lib/lib/markdown"
 import { createBalancedLayout } from "@portfolio/lib/lib/utils"
@@ -15,7 +15,7 @@ interface GallerySectionProps {
   hoverEffect?: 'inward' | 'gentle' // Hover animation variant
 }
 
-export default function GallerySection({ section, title, sectionId = "gallery", source = 'gallery', basePath = 'gallery', hoverEffect = 'inward' }: GallerySectionProps = {}) {
+function GallerySection({ section, title, sectionId = "gallery", source = 'gallery', basePath = 'gallery', hoverEffect = 'inward' }: GallerySectionProps = {}) {
   const { language, t } = useLanguage()
   const [galleryItems, setGalleryItems] = useState<GalleryItemMetadata[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -39,44 +39,45 @@ export default function GallerySection({ section, title, sectionId = "gallery", 
     return () => window.removeEventListener("force-load-section", onForce as EventListener)
   }, [])
 
-  useEffect(() => {
-    async function fetchGalleryItems() {
-      try {
-        const sectionParam = section ? `&section=${encodeURIComponent(section)}` : ''
-        const apiEndpoint = source === 'projects' ? 'projects' : 'gallery'
-        const response = await fetch(`/api/${apiEndpoint}?locale=${language}${sectionParam}`)
-        const data = await response.json()
-        
-        // If fetching from projects, transform to gallery format
-        if (source === 'projects') {
-          const transformedData = data.map((project: any) => ({
-            slug: project.slug,
-            title: project.title,
-            description: project.description,
-            quote: project.subcategory || project.category,
-            imageUrl: project.imageUrl,
-            date: project.date,
-            pinned: project.pinned,
-            locked: project.locked,
-            width: project.imageWidth,
-            height: project.imageHeight,
-          }))
-          setGalleryItems(transformedData)
-        } else {
-          setGalleryItems(data)
-        }
-      } catch (error) {
-        console.error('Failed to fetch gallery items:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  // Memoize fetch function for performance
+  const fetchGalleryItems = useCallback(async () => {
+    try {
+      const sectionParam = section ? `&section=${encodeURIComponent(section)}` : ''
+      const apiEndpoint = source === 'projects' ? 'projects' : 'gallery'
+      const response = await fetch(`/api/${apiEndpoint}?locale=${language}${sectionParam}`)
+      const data = await response.json()
 
+      // If fetching from projects, transform to gallery format
+      if (source === 'projects') {
+        const transformedData = data.map((project: any) => ({
+          slug: project.slug,
+          title: project.title,
+          description: project.description,
+          quote: project.subcategory || project.category,
+          imageUrl: project.imageUrl,
+          date: project.date,
+          pinned: project.pinned,
+          locked: project.locked,
+          width: project.imageWidth,
+          height: project.imageHeight,
+        }))
+        setGalleryItems(transformedData)
+      } else {
+        setGalleryItems(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch gallery items:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [language, section, source])
+
+  useEffect(() => {
     // Load immediately if hash is #gallery, otherwise wait for visibility
     if (shouldLoadImmediately || isVisible || forceLoad) {
       fetchGalleryItems()
     }
-  }, [isVisible, language, shouldLoadImmediately, forceLoad, section, source])
+  }, [isVisible, shouldLoadImmediately, forceLoad, fetchGalleryItems])
 
   // Handle pinned items (maintain their positions in the layout)
   const getPinnedItemsMap = (items: GalleryItemMetadata[]) => {
@@ -180,4 +181,7 @@ export default function GallerySection({ section, title, sectionId = "gallery", 
     </section>
   )
 }
+
+// Memoize the entire component to prevent unnecessary re-renders
+export default memo(GallerySection)
 
